@@ -73,7 +73,7 @@ object UI {
               }
             ),
             MenuItem(
-              menuItem.text := "Layout neu laden",
+              menuItem.text := "Layout zum Debuggen neu laden",
               menuItem.onAction := rebuild { _ => layout }
             )
           )(
