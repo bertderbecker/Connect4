@@ -1,31 +1,26 @@
 package de.erikbreer.connect4
 
-import javafx.event.ActionEvent
 import javafx.scene.Node
-import javafx.scene.input.MouseEvent
-
-import io.github.bertderbecker.scalapfui.javafx.{FXElement, FXParent}
-import io.github.bertderbecker.scalapfui.javafx.event.EventReactor.rebuild
 import javafx.scene.layout.{Border, BorderStroke, BorderStrokeStyle, BorderWidths, CornerRadii, VBox => JFXVBox}
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 
+import cats.implicits._
 import de.erikbreer.connect4.Connect4.{defaultGame, defaultSettings}
 import io.github.bertderbecker.scalapfui.attribute.StoredReadableAttribute
-import io.github.bertderbecker.scalapfui.javafx.scene.control.LabelExts._
-import io.github.bertderbecker.scalapfui.javafx.scene.control.DialogExts
 import io.github.bertderbecker.scalapfui.javafx.Implicits._
-import cats.implicits._
 import io.github.bertderbecker.scalapfui.javafx.attribute.FXStoredReadableAttribute
-import io.github.bertderbecker.scalapfui.javafx.event.EventReactor
+import io.github.bertderbecker.scalapfui.javafx.event.EventReactor.rebuild
 import io.github.bertderbecker.scalapfui.javafx.property.Conditions.when
 import io.github.bertderbecker.scalapfui.javafx.scene.SceneExts.Scene
+import io.github.bertderbecker.scalapfui.javafx.scene.control.LabelExts._
 import io.github.bertderbecker.scalapfui.javafx.scene.control.MenuBarExts.{MenuBar, menuBar}
 import io.github.bertderbecker.scalapfui.javafx.scene.control.MenuExts.{Menu, menu}
 import io.github.bertderbecker.scalapfui.javafx.scene.control.MenuItemExts.{MenuItem, menuItem}
 import io.github.bertderbecker.scalapfui.javafx.scene.layout.OrderedBoxes.{HBox, VBox, hBox, vBox}
 import io.github.bertderbecker.scalapfui.javafx.scene.shape.RectangleExts.{Rectangle, rectangle}
 import io.github.bertderbecker.scalapfui.javafx.stage.StageExts.{Stage, stage}
+import io.github.bertderbecker.scalapfui.javafx.{FXElement, FXParent}
 
 object UI {
 
@@ -76,6 +71,10 @@ object UI {
                   settings
                 )
               }
+            ),
+            MenuItem(
+              menuItem.text := "Layout neu laden",
+              menuItem.onAction := rebuild { _ => layout }
             )
           )(
             menu.text := "Spiel"
@@ -99,7 +98,7 @@ object UI {
       )(
         hBox.layoutY := 30,
         hBox.layoutX := 0,
-        hBox.prefWidth <== stageWidth / settings.width,
+        hBox.prefWidth <== stageWidth,
         hBox.prefHeight <== stageHeight - menuBarHeight
       )
     )()
@@ -114,8 +113,8 @@ object UI {
               if (stonesSeq.lengthCompare(Connect4.defaultSettings.height) >= 0)
                 throw new IllegalStateException("Ungültiger Zug !!!")
               stonesSeq :+ Rectangle(
-                rectangle.height := ((stageHeight - 70) / settings.height).value.get,
-                rectangle.width := (stageWidth / settings.width).value.get,
+                rectangle.height <== (stageHeight - 70) / settings.height,
+                rectangle.width <== stageWidth / settings.width,
                 rectangle.arcHeight := 40,
                 rectangle.arcWidth := 40,
                 rectangle.fill := playerStone.player.color
@@ -129,16 +128,10 @@ object UI {
               val newGame = game.copy(
                 history = game.history :+ columnPlayerStones.column
               )
-              val newLayout = try {
-                UI.layout(
-                  newGame,
-                  settings
-                )
-              } catch {
-                case e: IllegalStateException =>
-                  UI.layout(newGame, settings)
-              }
-              newLayout
+              UI.layout(
+                newGame,
+                settings
+              )
             },
             vBox.Alignment.BottomCenter,
             vBox.border := new Border(new BorderStroke(Color.WHITE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT))
