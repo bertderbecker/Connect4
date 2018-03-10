@@ -27,8 +27,7 @@ object UI {
   val stageWidth: StoredReadableAttribute[Double] = FXStoredReadableAttribute[Double]()
   val stageHeight: StoredReadableAttribute[Double] = FXStoredReadableAttribute[Double]()
 
-  val defaultStageWidth = 800
-  //Konstanten können ohne Probleme verändert werden !
+  val defaultStageWidth = 800 //Konstanten können ohne Probleme verändert werden !
   val defaultStageHeight = 400 //Konstanten können ohne Probleme verändert werden !
 
   val menuBarHeight = 30
@@ -40,7 +39,6 @@ object UI {
       stage.initHeight := defaultStageHeight,
       stage.width ==> stageWidth,
       stage.height ==> stageHeight,
-      //stage.onCloseRequest := EventReactor { _ => println("exit"); Platform.exit(); System.exit(0) },
       stage.scene := Scene(
         UI.layout(defaultGame, defaultSettings)
       )()
@@ -109,7 +107,7 @@ object UI {
       .foldLeft(Seq.empty[FXElement[_ <: Node]]) { (columnSeq, columnPlayerStones) =>
         columnSeq :+
           VBox(
-            columnPlayerStones.stones.foldLeft(Seq.empty[FXElement[_ <: Node]]) { (stonesSeq, playerStone) =>
+            columnPlayerStones.stones.foldLeft(Seq.empty[FXElement[_ <: Node]]) { (stonesSeq, player) =>
               if (stonesSeq.lengthCompare(Connect4.defaultSettings.height) >= 0)
                 throw new IllegalStateException("Ungültiger Zug !!!")
               stonesSeq :+ Rectangle(
@@ -117,7 +115,7 @@ object UI {
                 rectangle.width <== stageWidth / settings.width,
                 rectangle.arcHeight := 40,
                 rectangle.arcWidth := 40,
-                rectangle.fill := playerStone.player.color
+                rectangle.fill := player.color
               )
             }: _*
           )(

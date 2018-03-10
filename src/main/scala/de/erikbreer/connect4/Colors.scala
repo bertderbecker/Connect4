@@ -1,10 +1,9 @@
 package de.erikbreer.connect4
 
 import javafx.scene.paint.Color
+
 import io.github.bertderbecker.collection.extras.SeqRemover._
 import io.github.bertderbecker.collection.extras.SeqShuffler._
-
-import de.erikbreer.connect4.Connect4.Player
 
 object Colors {
 
@@ -18,7 +17,6 @@ object Colors {
   val invalidColors: Seq[Color] =
     Seq(Color.RED, Color.DARKGREY, Color.BLUE, Color.MEDIUMBLUE, Color.TRANSPARENT)
   val suitableColors: Seq[Color] = allColors - backgroundColor - winningColor -- invalidColors
-
 
   def colors(number: Int): Seq[Color] =
     (1 to number)

@@ -1,14 +1,12 @@
 package de.erikbreer.connect4
 
 
-import javafx.application.{Application, Platform}
-import javafx.scene.{Node, Parent => JFXParent}
-import javafx.scene.layout.{Border, BorderStroke, BorderStrokeStyle, BorderWidths, CornerRadii, VBox => JFXVBox}
+import javafx.scene.layout.{VBox => JFXVBox}
 import javafx.scene.paint.Color
-import io.github.bertderbecker.scalapfui.javafx.{FXElement, FXParent, JFXApp}
-import io.github.bertderbecker.scalapfui.property.ReadableProperty
+import javafx.scene.{Parent => JFXParent}
 
-import scala.collection.immutable
+import io.github.bertderbecker.scalapfui.javafx.JFXApp
+
 import scala.language.{higherKinds, implicitConversions}
 
 object Connect4 extends JFXApp {
@@ -18,10 +16,10 @@ object Connect4 extends JFXApp {
     def color: Color = colors(index)
   }
 
-  case class Settings(height: Int, width: Int, kiLevel: Int, beginningPlayerIndex: Int, numberOfPlayers: Int)
+  case class Settings(height: Int, width: Int, beginningPlayerIndex: Int, numberOfPlayers: Int)
   //Konstanten können ohne Probleme verändert werden !
   val defaultSettings =
-    Settings(height = 6, width = 7, kiLevel = 5, beginningPlayerIndex =  0, numberOfPlayers = 2)
+    Settings(height = 6, width = 7, beginningPlayerIndex = 0, numberOfPlayers = 3)
 
   def calcColors(): Seq[Color] = Colors.colors(defaultSettings.numberOfPlayers)
   private val colors = calcColors()
@@ -45,28 +43,21 @@ object Connect4 extends JFXApp {
     game.copy(players = game.players.map(_.copy(colors = newColors)))
   }
 
-  def increaseIndex(index: Int): Int = if (index < (defaultSettings.numberOfPlayers - 1)) index + 1 else 0
-
-  case class PlayerStone(player: Player, column: Int)
-  case class StonesOfColumn(column: Int, stones: Seq[PlayerStone])
+  case class StonesOfColumn(column: Int, stones: Seq[Player])
 
   def convertHistory(implicit game: Game, settings: Settings): Seq[StonesOfColumn] = {
     println("convertHistory " + game.history)
-    val playerTupleSeq: Seq[(Int, Player)] =
-      game.history zip
+    val stonesOfColumns: Seq[StonesOfColumn] =
+      (game.history zip
         Seq.iterate(
           game.players(settings.beginningPlayerIndex),
           game.history.size
-        )(p => game.players(increaseIndex(p.index)))
-    val stonesOfColumns =
-      playerTupleSeq
-        .map(tuple => PlayerStone(tuple._2, tuple._1))
-        .groupBy(_.column)
-        .map(tuple => StonesOfColumn(tuple._1, tuple._2.reverse))
+        )(p => game.players((p.index + 1) % game.players.size)))
+        .groupBy(_._1)
+        .map(tuple => StonesOfColumn(tuple._1, tuple._2.reverse.map(_._2)))
         .toSeq
-    val takenColumns = stonesOfColumns.map(_.column)
     val emptyColumns =
-      for (i <- 1 to settings.width if !takenColumns.contains(i))
+      for (i <- 1 to settings.width if !stonesOfColumns.map(_.column).contains(i))
         yield StonesOfColumn(i, Seq.empty)
     (stonesOfColumns ++ emptyColumns).sortBy(_.column)
   }
